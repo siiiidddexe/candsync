@@ -1,0 +1,17 @@
+# Auto-normalize line endings on checkout
+* text=auto eol=lf
+
+# Windows batch files keep CRLF
+*.bat text eol=crlf
+
+# Binary files
+*.db binary
+*.db-shm binary
+*.db-wal binary
+*.xlsx binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary

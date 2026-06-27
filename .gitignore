@@ -1,0 +1,30 @@
+# ─── Node ────────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Environment variables ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─── SQLite database (runtime data – not source code) ────────────────────────
+backend/candsync.db
+backend/candsync.db-shm
+backend/candsync.db-wal
+
+# ─── Uploaded resume files ────────────────────────────────────────────────────
+backend/uploads/
+
+# ─── Vite / Frontend build output ────────────────────────────────────────────
+frontend/dist/
+frontend/.vite/
+
+# ─── OS / Editor junk ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.user
