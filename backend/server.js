@@ -21,6 +21,7 @@ app.use('/api/candidates', require('./routes/candidates'));
 app.use('/api/statuses', require('./routes/statuses'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/templates', require('./routes/templates'));
 
 // Serve compiled frontend in production (single-container deployment)
 if (IS_PROD) {

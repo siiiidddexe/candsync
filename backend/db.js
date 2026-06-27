@@ -21,6 +21,14 @@ db.exec(`
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
+  CREATE TABLE IF NOT EXISTS header_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    columns TEXT NOT NULL DEFAULT '[]',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
   CREATE TABLE IF NOT EXISTS jobs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -29,9 +37,11 @@ db.exec(`
     skills TEXT,
     description TEXT,
     status TEXT DEFAULT 'active',
+    template_id INTEGER,
     created_by INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (template_id) REFERENCES header_templates(id),
     FOREIGN KEY (created_by) REFERENCES users(id)
   );
 
@@ -73,6 +83,7 @@ db.exec(`
     preferred_location TEXT,
     rate_per_month TEXT,
     notice_period TEXT,
+    custom_fields TEXT DEFAULT '{}',
     status_id INTEGER,
     resume_path TEXT,
     resume_original_name TEXT,
@@ -91,6 +102,11 @@ db.exec(`
   );
 `);
 
+// Migrations for existing DBs
+['ALTER TABLE jobs ADD COLUMN template_id INTEGER',
+ 'ALTER TABLE candidates ADD COLUMN custom_fields TEXT DEFAULT "{}"']
+  .forEach(sql => { try { db.exec(sql); } catch {} });
+
 // Helper: prepare with bigint reading disabled
 function prep(sql) {
   const stmt = db.prepare(sql);
@@ -98,7 +114,7 @@ function prep(sql) {
   return stmt;
 }
 
-// Seed superadmin — credentials must be supplied via SA_EMAIL / SA_PASS env vars
+// Seed superadmin
 const adminRow = prep('SELECT id FROM users WHERE role = ?').get('superadmin');
 if (!adminRow) {
   const SA_EMAIL = process.env.SA_EMAIL;
@@ -107,19 +123,19 @@ if (!adminRow) {
     console.error('ERROR: Set SA_EMAIL and SA_PASS env vars before first run.');
     process.exit(1);
   }
-  const hashedPw = bcrypt.hashSync(SA_PASS, 10);
   const fullPerms = {
     jobs: { create: true, read: true, update: true, delete: true },
     candidates: { create: true, read: true, update: true, delete: true },
     exports: { withResume: true, withoutResume: true },
     resumeAccess: true,
     statuses: { create: true, read: true, update: true, delete: true },
+    templates: { create: true, read: true, update: true, delete: true },
     users: { create: true, read: true, update: true, delete: true },
     settings: true,
     jobAccess: 'all'
   };
   prep('INSERT INTO users (name,email,password,role,permissions) VALUES (?,?,?,?,?)')
-    .run('Super Admin', SA_EMAIL, hashedPw, 'superadmin', JSON.stringify(fullPerms));
+    .run('Super Admin', SA_EMAIL, bcrypt.hashSync(SA_PASS, 10), 'superadmin', JSON.stringify(fullPerms));
   console.log('Superadmin seeded.');
 }
 
@@ -128,20 +144,51 @@ const statusCount = prep('SELECT COUNT(*) as c FROM statuses').get();
 if (!statusCount.c) {
   const ins = prep('INSERT INTO statuses (name,color,order_index) VALUES (?,?,?)');
   [
-    ['New', '#6366f1', 0], ['Screening', '#f59e0b', 1], ['Shortlisted', '#10b981', 2],
+    ['New', '#000000', 0], ['Screening', '#f59e0b', 1], ['Shortlisted', '#10b981', 2],
     ['Interview Scheduled', '#3b82f6', 3], ['Selected', '#22c55e', 4],
     ['Rejected', '#ef4444', 5], ['On Hold', '#94a3b8', 6],
   ].forEach(([n, c, o]) => ins.run(n, c, o));
 }
 
+// Seed default header template
+const tmplCount = prep('SELECT COUNT(*) as c FROM header_templates').get();
+if (!tmplCount.c) {
+  const defaultCols = [
+    { label: 'Date', key: 'date' },
+    { label: 'Sub source', key: 'sub_source' },
+    { label: 'Candidate Name', key: 'name' },
+    { label: 'Skill', key: 'skill' },
+    { label: 'Mobile No', key: 'mobile' },
+    { label: 'Email Id', key: 'email' },
+    { label: 'Date of Birth', key: 'dob' },
+    { label: 'Qualification', key: 'qualification' },
+    { label: 'Year of Passing', key: 'year_of_passing' },
+    { label: 'Total Exp', key: 'total_exp' },
+    { label: 'Rel Exp', key: 'rel_exp' },
+    { label: 'Current Organization', key: 'current_org' },
+    { label: 'Current Location', key: 'current_location' },
+    { label: 'Preferred Location', key: 'preferred_location' },
+    { label: 'Rate per Month', key: 'rate_per_month' },
+    { label: 'Notice Period', key: 'notice_period' },
+  ];
+  prep('INSERT INTO header_templates (name, columns) VALUES (?, ?)')
+    .run('Standard (All Fields)', JSON.stringify(defaultCols));
+}
+
 // Seed settings
 [
-  ['gemini_api_key', ''], ['openrouter_api_key', ''],
+  ['gemini_api_key', ''],
+  ['openrouter_api_key', ''],
   ['openrouter_model', 'google/gemini-2.0-flash-exp:free'],
-  ['gemini_model', 'gemini-2.0-flash'],
+  ['gemini_model', 'gemini-2.5-flash-preview-05-20'],
   ['ai_provider', 'gemini'],
 ].forEach(([k, v]) => prep('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)').run(k, v));
 
-// Export both raw db and the prep helper
+// Update stale gemini_model default if still on deprecated value
+const gmRow = prep("SELECT value FROM settings WHERE key='gemini_model'").get();
+if (gmRow && (gmRow.value === 'gemini-2.0-flash' || gmRow.value === 'gemini-1.5-flash')) {
+  prep("UPDATE settings SET value='gemini-2.5-flash-preview-05-20' WHERE key='gemini_model'").run();
+}
+
 db.prep = prep;
 module.exports = db;

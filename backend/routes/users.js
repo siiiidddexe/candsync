@@ -12,6 +12,7 @@ const DEFAULT_PERMS = {
   exports: { withResume: false, withoutResume: true },
   resumeAccess: false,
   statuses: { create: false, read: true, update: false, delete: false },
+  templates: { create: false, read: true, update: false, delete: false },
   users: { create: false, read: false, update: false, delete: false },
   settings: false,
   jobAccess: 'all'

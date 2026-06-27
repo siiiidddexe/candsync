@@ -7,6 +7,7 @@ import Candidates from './pages/Candidates';
 import Statuses from './pages/Statuses';
 import Users from './pages/Users';
 import Settings from './pages/Settings';
+import Templates from './pages/Templates';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ function AppRoutes() {
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Jobs />} />
         <Route path="jobs/:jobId/candidates" element={<Candidates />} />
+        <Route path="templates" element={<Templates />} />
         <Route path="statuses" element={<Statuses />} />
         <Route path="users" element={<Users />} />
         <Route path="settings" element={<Settings />} />
