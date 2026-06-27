@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
 });
 
 router.put('/', (req, res) => {
-  const allowed = ['gemini_api_key','openrouter_api_key','openrouter_model','ai_provider'];
+  const allowed = ['gemini_api_key','openrouter_api_key','openrouter_model','gemini_model','ai_provider'];
   const upsert = db.prep('INSERT OR REPLACE INTO settings (key,value,updated_at) VALUES (?,?,CURRENT_TIMESTAMP)');
   allowed.forEach(k => { if (req.body[k] !== undefined) upsert.run(k, req.body[k]); });
   res.json({ message: 'Settings saved' });

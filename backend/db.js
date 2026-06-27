@@ -98,10 +98,16 @@ function prep(sql) {
   return stmt;
 }
 
-// Seed superadmin
+// Seed superadmin — credentials must be supplied via SA_EMAIL / SA_PASS env vars
 const adminRow = prep('SELECT id FROM users WHERE role = ?').get('superadmin');
 if (!adminRow) {
-  const hashedPw = bcrypt.hashSync('Admin@123', 10);
+  const SA_EMAIL = process.env.SA_EMAIL;
+  const SA_PASS  = process.env.SA_PASS;
+  if (!SA_EMAIL || !SA_PASS) {
+    console.error('ERROR: Set SA_EMAIL and SA_PASS env vars before first run.');
+    process.exit(1);
+  }
+  const hashedPw = bcrypt.hashSync(SA_PASS, 10);
   const fullPerms = {
     jobs: { create: true, read: true, update: true, delete: true },
     candidates: { create: true, read: true, update: true, delete: true },
@@ -113,8 +119,8 @@ if (!adminRow) {
     jobAccess: 'all'
   };
   prep('INSERT INTO users (name,email,password,role,permissions) VALUES (?,?,?,?,?)')
-    .run('Super Admin', 'admin@candsync.com', hashedPw, 'superadmin', JSON.stringify(fullPerms));
-  console.log('Default superadmin created: admin@candsync.com / Admin@123');
+    .run('Super Admin', SA_EMAIL, hashedPw, 'superadmin', JSON.stringify(fullPerms));
+  console.log('Superadmin seeded.');
 }
 
 // Seed statuses
@@ -131,7 +137,9 @@ if (!statusCount.c) {
 // Seed settings
 [
   ['gemini_api_key', ''], ['openrouter_api_key', ''],
-  ['openrouter_model', 'google/gemini-2.0-flash-exp:free'], ['ai_provider', 'gemini'],
+  ['openrouter_model', 'google/gemini-2.0-flash-exp:free'],
+  ['gemini_model', 'gemini-2.0-flash'],
+  ['ai_provider', 'gemini'],
 ].forEach(([k, v]) => prep('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)').run(k, v));
 
 // Export both raw db and the prep helper

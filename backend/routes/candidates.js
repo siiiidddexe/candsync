@@ -45,7 +45,8 @@ Return ONLY the JSON, no other text.`;
 async function extractWithGemini(filePath, mimeType, apiKey) {
   const { default: fetch } = await import('node-fetch');
   const base64 = fs.readFileSync(filePath).toString('base64');
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+  const model = getSetting('gemini_model') || 'gemini-2.0-flash';
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

@@ -9,6 +9,7 @@ export default function Settings() {
     gemini_api_key: '',
     openrouter_api_key: '',
     openrouter_model: 'google/gemini-2.0-flash-exp:free',
+    gemini_model: 'gemini-2.0-flash',
     ai_provider: 'gemini',
   });
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,7 @@ export default function Settings() {
       setForm(p => ({
         ...p,
         openrouter_model: data.openrouter_model || p.openrouter_model,
+        gemini_model: data.gemini_model || p.gemini_model,
         ai_provider: data.ai_provider || p.ai_provider,
       }));
     }).catch(() => toast.error('Failed to load settings'))
@@ -145,6 +147,16 @@ export default function Settings() {
                   autoFocus
                 />
               )}
+            </div>
+
+            {/* Gemini Model */}
+            <div>
+              <label className="label">Gemini Model</label>
+              <select className="input" value={form.gemini_model} onChange={e => setForm(p => ({ ...p, gemini_model: e.target.value }))}>
+                {['gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-flash','gemini-1.5-pro','gemini-2.5-flash-preview-05-20'].map(m => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
             </div>
 
             {/* OpenRouter Model */}

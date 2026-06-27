@@ -16,54 +16,81 @@ export default function Login() {
       await login(form.email, form.password);
       navigate('/');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Login failed');
+      toast.error(err.response?.data?.error || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary-900 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-500 mb-4 shadow-lg shadow-primary-500/30">
-            <span className="text-white font-bold text-2xl">C</span>
+    <div className="min-h-screen bg-white flex">
+      {/* Left panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-black flex-col justify-between p-12">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-white rounded-sm flex items-center justify-center">
+            <span className="text-black font-black text-sm">C</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">CandSync</h1>
-          <p className="text-slate-400 text-sm mt-1">Candidate Management System</p>
+          <span className="text-white font-semibold tracking-wide text-lg">CandSync</span>
         </div>
+        <div>
+          <p className="text-white/30 text-xs uppercase tracking-[0.2em] mb-4">Recruitment Management</p>
+          <h2 className="text-white text-4xl font-light leading-snug">
+            Manage candidates.<br />
+            <span className="font-semibold">Faster.</span>
+          </h2>
+        </div>
+        <p className="text-white/20 text-xs">© {new Date().getFullYear()} CandSync</p>
+      </div>
 
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-          <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Right panel */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="flex items-center gap-2 mb-10 lg:hidden">
+            <div className="w-7 h-7 bg-black rounded-sm flex items-center justify-center">
+              <span className="text-white font-black text-xs">C</span>
+            </div>
+            <span className="font-semibold text-black">CandSync</span>
+          </div>
+
+          <h1 className="text-2xl font-semibold text-black mb-1">Sign in</h1>
+          <p className="text-slate-400 text-sm mb-8">Enter your credentials to continue</p>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="label text-slate-300">Email</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">Email address</label>
               <input
                 type="email"
                 required
+                autoComplete="email"
                 value={form.email}
                 onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                className="w-full px-3 py-2.5 text-sm bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
+                className="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg bg-white text-black placeholder-slate-300 focus:outline-none focus:border-black transition-colors"
                 placeholder="you@example.com"
               />
             </div>
+
             <div>
-              <label className="label text-slate-300">Password</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">Password</label>
               <input
                 type="password"
                 required
+                autoComplete="current-password"
                 value={form.password}
                 onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                className="w-full px-3 py-2.5 text-sm bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
+                className="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg bg-white text-black placeholder-slate-300 focus:outline-none focus:border-black transition-colors"
                 placeholder="••••••••"
               />
             </div>
-            <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-2.5 mt-2">
-              {loading ? 'Signing in...' : 'Sign in'}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-black text-white py-3 rounded-lg text-sm font-medium hover:bg-slate-800 active:bg-slate-900 transition-colors disabled:opacity-40 mt-2"
+            >
+              {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
-          <p className="text-xs text-slate-400 text-center mt-4">
-            Default: admin@candsync.com / Admin@123
-          </p>
         </div>
       </div>
     </div>
