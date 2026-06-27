@@ -1,0 +1,53 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CandSync – Docker Swarm Stack for Dokploy
+# Deploy: docker stack deploy -c docker-stack.yml candsync --resolve-image never
+# Domain: http://directory.hiperboard.com
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  candsync:
+    image: candsync:latest          # Built locally via: docker compose build
+    networks:
+      - dokploy-network
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DB_PATH=/app/data/candsync.db
+      - JWT_SECRET=${JWT_SECRET}    # Set in .env or export before deploying
+      - FRONTEND_URL=http://directory.hiperboard.com
+    volumes:
+      - candsync-data:/app/data       # SQLite database persistence
+      - candsync-uploads:/app/uploads # Resume file persistence
+    healthcheck:
+      disable: true   # Required: Swarm kills containers marked unhealthy too early
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 60s
+      update_config:
+        parallelism: 1
+        delay: 10s
+      # Traefik Swarm labels (picked up by Dokploy's Traefik via Swarm provider)
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=dokploy-network"
+        - "traefik.http.routers.candsync.rule=Host(`directory.hiperboard.com`)"
+        - "traefik.http.routers.candsync.entrypoints=web"
+        - "traefik.http.services.candsync.loadbalancer.server.port=5000"
+
+# ─── Join Dokploy's shared Traefik overlay network ───────────────────────────
+networks:
+  dokploy-network:
+    external: true
+
+# ─── Persistent volumes ───────────────────────────────────────────────────────
+volumes:
+  candsync-data:
+    driver: local
+  candsync-uploads:
+    driver: local
