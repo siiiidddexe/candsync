@@ -1,0 +1,59 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CandSync – Docker Compose for Dokploy
+# Domain: http://directory.hiperboard.com
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  candsync:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: candsync:latest
+    container_name: candsync
+    restart: unless-stopped
+
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DB_PATH=/app/data/candsync.db
+      # REQUIRED: Set a strong secret (min 32 chars) via Dokploy env vars
+      - JWT_SECRET=${JWT_SECRET:-candsync-change-this-to-a-long-random-secret}
+      - FRONTEND_URL=http://directory.hiperboard.com
+
+    volumes:
+      # SQLite database persistence
+      - candsync-data:/app/data
+      # Uploaded resume files persistence
+      - candsync-uploads:/app/uploads
+
+    networks:
+      - dokploy-network
+
+    # ── Traefik labels (Dokploy's built-in reverse proxy) ───────────────────
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+
+      # HTTP router
+      - "traefik.http.routers.candsync.rule=Host(`directory.hiperboard.com`)"
+      - "traefik.http.routers.candsync.entrypoints=web"
+      - "traefik.http.services.candsync.loadbalancer.server.port=5000"
+
+      # Optional: redirect HTTP → HTTPS when you add a cert
+      # - "traefik.http.routers.candsync-secure.rule=Host(`directory.hiperboard.com`)"
+      # - "traefik.http.routers.candsync-secure.entrypoints=websecure"
+      # - "traefik.http.routers.candsync-secure.tls.certresolver=letsencrypt"
+
+# ─── Named volumes (data persists across container restarts/rebuilds) ─────────
+volumes:
+  candsync-data:
+    driver: local
+  candsync-uploads:
+    driver: local
+
+# ─── Join Dokploy's shared Traefik network ────────────────────────────────────
+networks:
+  dokploy-network:
+    external: true
