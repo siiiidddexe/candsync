@@ -75,11 +75,11 @@ function CandidateModal({ candidate, job, onClose, onSaved }) {
       fd.append('resume', file);
       fd.append('columns', JSON.stringify(columns));
       const { data } = await api.post('/candidates/extract', fd);
-      const ex = data.extracted;
+      const ex = { ...data.standard, ...data.custom };
       setForm(prev => {
         const next = { ...prev };
         columns.forEach(col => {
-          const val = ex[col.key] || ex[col.label];
+          const val = ex[col.key];
           if (val) next[col.key] = String(val);
         });
         return next;
