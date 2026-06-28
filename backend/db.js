@@ -180,14 +180,14 @@ if (!tmplCount.c) {
   ['gemini_api_key', ''],
   ['openrouter_api_key', ''],
   ['openrouter_model', 'google/gemini-2.0-flash-exp:free'],
-  ['gemini_model', 'gemini-2.5-flash-preview-05-20'],
+  ['gemini_model', 'gemini-2.5-flash'],
   ['ai_provider', 'gemini'],
 ].forEach(([k, v]) => prep('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)').run(k, v));
 
 // Update stale gemini_model default if still on deprecated value
 const gmRow = prep("SELECT value FROM settings WHERE key='gemini_model'").get();
-if (gmRow && (gmRow.value === 'gemini-2.0-flash' || gmRow.value === 'gemini-1.5-flash')) {
-  prep("UPDATE settings SET value='gemini-2.5-flash-preview-05-20' WHERE key='gemini_model'").run();
+if (gmRow && ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-preview-05-20'].includes(gmRow.value)) {
+  prep("UPDATE settings SET value='gemini-2.5-flash' WHERE key='gemini_model'").run();
 }
 
 db.prep = prep;

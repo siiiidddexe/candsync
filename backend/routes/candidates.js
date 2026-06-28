@@ -75,7 +75,7 @@ async function callOpenRouter(filePath, mimeType, apiKey, model, prompt) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': 'https://hiperboard.app', 'X-Title': 'Hiperboard Resdex' },
     body: JSON.stringify({
-      model: model || 'google/gemini-2.5-flash-preview:free',
+      model: model || 'google/gemini-2.5-flash:free',
       messages: [{ role: 'user', content: [
         { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
         { type: 'text', text: prompt }
@@ -132,7 +132,7 @@ router.post('/extract', can('candidates', 'create'), upload.single('resume'), as
   const mimeType = req.file.mimetype;
   const aiProvider = getSetting('ai_provider') || 'gemini';
   const geminiKey = getSetting('gemini_api_key');
-  const geminiModel = getSetting('gemini_model') || 'gemini-2.5-flash-preview-05-20';
+  const geminiModel = getSetting('gemini_model') || 'gemini-2.5-flash';
   const orKey = getSetting('openrouter_api_key');
   const orModel = getSetting('openrouter_model');
 

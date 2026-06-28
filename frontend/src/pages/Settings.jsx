@@ -4,15 +4,15 @@ import toast from 'react-hot-toast';
 import { KeyIcon, SparklesIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 const GEMINI_MODELS = [
-  'gemini-2.5-flash-preview-05-20',
-  'gemini-2.5-pro-preview-05-06',
+  'gemini-2.5-flash',
+  'gemini-2.5-pro',
   'gemini-2.0-flash-lite',
   'gemini-1.5-flash-latest',
   'gemini-1.5-pro-latest',
 ];
 
 const OR_MODELS = [
-  'google/gemini-2.5-flash-preview:free',
+  'google/gemini-2.5-flash:free',
   'google/gemini-2.0-flash-exp:free',
   'google/gemma-3-27b-it:free',
   'qwen/qwen2.5-vl-72b-instruct:free',

@@ -37,7 +37,7 @@ async function callOpenRouterText(text, apiKey, model) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': 'https://hiperboard.app', 'X-Title': 'Hiperboard Resdex' },
     body: JSON.stringify({
-      model: model || 'google/gemini-2.5-flash-preview:free',
+      model: model || 'google/gemini-2.5-flash:free',
       messages: [{ role: 'user', content: `${JD_PROMPT}\n\nJob Description Text:\n${text}` }]
     })
   });
@@ -56,7 +56,7 @@ router.post('/extract-text', can('jobs', 'create'), async (req, res) => {
 
   const aiProvider = getSetting('ai_provider') || 'gemini';
   const geminiKey = getSetting('gemini_api_key');
-  const geminiModel = getSetting('gemini_model') || 'gemini-2.5-flash-preview-05-20';
+  const geminiModel = getSetting('gemini_model') || 'gemini-2.5-flash';
   const orKey = getSetting('openrouter_api_key');
   const orModel = getSetting('openrouter_model');
 
