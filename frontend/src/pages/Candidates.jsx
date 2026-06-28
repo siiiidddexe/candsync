@@ -55,8 +55,18 @@ function CandidateModal({ candidate, job, onClose, onSaved }) {
   const columns = job.template_columns || DEFAULT_COLUMNS;
   const isEdit = !!candidate;
   const [form, setForm] = useState(() => {
+    const defaults = !isEdit ? {
+      date: new Date().toISOString().slice(0, 10),
+      sub_source: 'N/A',
+      current_location: 'Bangalore',
+      preferred_location: 'Bangalore',
+      notice_period: '15 days',
+    } : {};
     const init = { status_id: candidate?.status_id || '' };
-    columns.forEach(col => { init[col.key] = getCandidateValue(candidate || {}, col.key); });
+    columns.forEach(col => {
+      const existing = getCandidateValue(candidate || {}, col.key);
+      init[col.key] = existing || defaults[col.key] || '';
+    });
     return init;
   });
   const [file, setFile] = useState(null);
@@ -94,6 +104,7 @@ function CandidateModal({ candidate, job, onClose, onSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.name?.trim()) { toast.error('Candidate Name is required'); return; }
     setSaving(true);
     try {
       const fd = new FormData();
